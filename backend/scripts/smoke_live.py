@@ -69,9 +69,9 @@ def main() -> int:
     s2, p2, _ = request("POST", "/chat", {"session_id": f"smoke-b-{run}", "message": question})
     md2 = p2.get("metadata", {})
     check("cache: LLM_CACHE on same first message in new session", md2.get("resolution_source") == "LLM_CACHE", json.dumps(md2))
-    check("cache: identical reply", p2.get("reply") == p1.get("reply"))
+    check("cache: identical reply", bool(p1.get("reply")) and p2.get("reply") == p1.get("reply"))
     check("cache: key_id null, fallback 0", md2.get("key_id") is None and md2.get("fallback_attempts") == 0)
-    check("cache: same tokens", (md2.get("input_tokens"), md2.get("output_tokens")) == (md1.get("input_tokens"), md1.get("output_tokens")))
+    check("cache: same tokens", bool(md1.get("input_tokens")) and (md2.get("input_tokens"), md2.get("output_tokens")) == (md1.get("input_tokens"), md1.get("output_tokens")))
     check("cache: faster than live", md2.get("latency_ms", 1e9) < md1.get("latency_ms", 0),
           f"live={md1.get('latency_ms')}ms cache={md2.get('latency_ms')}ms")
 
@@ -85,8 +85,8 @@ def main() -> int:
     s4, p4, _ = request("POST", "/chat", {"session_id": f"smoke-d-{run}", "message": "hello"},
                         headers={"X-Simulate-Failure": "*=429"})
     check("*=429 -> 503 all providers unavailable", s4 == 503 and p4 == {"detail": "all providers unavailable"}, json.dumps(p4))
-    s4h, _, _ = request("GET", f"/sessions/smoke-d-{run}/messages")
-    check("*=429 stored nothing (history 404)", s4h == 404)
+    s4h, p4h, _ = request("GET", f"/sessions/smoke-d-{run}/messages")
+    check("*=429 stored nothing (history 404)", s4h == 404 and p4h == {"detail": "session not found"})
 
     sid = f"smoke-a-{run}"
     request("POST", "/chat", {"session_id": sid, "message": "What city did I just ask about? Answer with one word."})
