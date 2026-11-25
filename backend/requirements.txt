@@ -1,0 +1,11 @@
+# Runtime dependencies (exact pins).
+# litellm 1.97.0 (2026-08-16): newer lines (>=1.98) import litellm.proxy.* on the
+# cache-hit path, which requires proxy-only extras (orjson, soundfile, ...) and
+# crashes a plain `pip install litellm` on every cache hit. Avoid 1.82.7/1.82.8.
+litellm==1.97.0
+fastapi==0.165.0
+starlette==1.10.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.4
+python-dotenv==1.2.4
+diskcache==5.6.3
