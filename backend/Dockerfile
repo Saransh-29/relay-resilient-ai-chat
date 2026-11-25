@@ -34,7 +34,6 @@ WORKDIR /app
 COPY --chown=app:app app ./app
 
 USER app
-VOLUME ["/data"]
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
